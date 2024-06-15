@@ -1,5 +1,4 @@
-# pip install PyPDF2
-# pip install pdfplumber
+# pip install PyPDF2 pdfplumber
 
 import pdfplumber
 import pandas as pd
@@ -41,12 +40,14 @@ with pdfplumber.open(pdf_path) as pdf:
 
 # 텍스트를 필요한 형태로 가공 (위치에 따른 재배치)
 ordered_texts = []
-num_rows = len(all_columns_texts[0])  # 첫 페이지의 열 수 기준으로 행 수 결정
+num_pages = len(all_columns_texts)  # 전체 페이지 수
+num_columns = len(all_columns_texts[0]) if all_columns_texts else 0  # 첫 페이지의 열 개수
 
-for row in range(num_rows):
-    for page_columns in all_columns_texts:
-        if row < len(page_columns):
-            ordered_texts.append(page_columns[row])
+# 페이지 순서대로 교차 배치
+for page_idx in range(num_pages):
+    for col in range(num_columns):
+        if col < len(all_columns_texts[page_idx]):
+            ordered_texts.append(all_columns_texts[page_idx][col])
 
 # 학기 정보 및 과목 정보 추출을 위한 정규 표현식 패턴
 semester_pattern = re.compile(r"\d학년 \d{4}학년도 [^ ]+기")
@@ -98,7 +99,7 @@ with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
 print(f'{csv_filename} 파일이 성공적으로 저장되었습니다.')
 
 # CSV 파일 불러오기
-df = pd.read_csv('courses.csv')
+df = pd.read_csv('transcript_contents.csv')
 
 # 데이터프레임 출력
 display(df)
